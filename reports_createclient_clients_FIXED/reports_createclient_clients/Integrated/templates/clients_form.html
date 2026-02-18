@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<div class="card p-3">
+		<form method="post" class="d-grid gap-3">
+
+			<div>
+				<label class="form-label">Client name *</label>
+				<input type="text" name="client_name" class="form-control" required value="{{ form.client_name }}" placeholder="e.g. ABC Trading Pte Ltd">
+			</div>
+
+			<div>
+				<label class="form-label">Email</label>
+				<input type="email" name="email" class="form-control" value="{{ form.email }}" placeholder="client@example.com">
+			</div>
+
+			<div>
+				<label class="form-label">Phone</label>
+				<input type="text" name="phone" class="form-control" value="{{ form.phone }}" placeholder="+65 9123 4567">
+			</div>
+
+			<div>
+				<label class="form-label">Address</label>
+				<textarea name="address" class="form-control" rows="3" placeholder="Company address">{{ form.address }}</textarea>
+			</div>
+
+			<div class="d-flex gap-2">
+				{% if mode == "edit" %}
+					<button class="btn btn-primary" type="submit">Save changes</button>
+				{% else %}
+					<button class="btn btn-primary" type="submit">Save client</button>
+				{% endif %}
+
+				<a class="btn btn-outline-secondary" href="{{ url_for('clients_list') }}">Cancel</a>
+			</div>
+
+		</form>
+	</div>
+{% endblock %}

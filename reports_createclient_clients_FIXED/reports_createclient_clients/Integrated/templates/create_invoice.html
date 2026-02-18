@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h4 mb-1">Create Invoice</h1>
+    <p class="text-muted mb-0">Create a draft invoice from catalogue services.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('invoice_delivery') }}">Go to Invoice Delivery</a>
+</div>
+
+<div class="card p-3">
+  <form id="createInvoiceForm" class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label">Client</label>
+      <select class="form-select" id="clientId" required>
+        <option value="">Select a client</option>
+        {% for client in clients %}
+          <option value="{{ client.id }}" data-name="{{ client.client_name }}" data-email="{{ client.email or '' }}">{{ client.client_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Client Name</label>
+      <input id="clientName" class="form-control" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Client Email</label>
+      <input id="clientEmail" class="form-control" type="email" required>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Services</label>
+      <div id="serviceList" class="d-grid gap-2"></div>
+      <div class="text-muted small mt-2">Select at least one item and set quantity.</div>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+      <button type="submit" class="btn btn-primary">Create Invoice</button>
+      <a class="btn btn-outline-secondary" href="{{ url_for('approvals') }}">Open Approvals</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  const clientSelect = document.getElementById('clientId');
+  const clientName = document.getElementById('clientName');
+  const clientEmail = document.getElementById('clientEmail');
+  const serviceList = document.getElementById('serviceList');
+  const form = document.getElementById('createInvoiceForm');
+
+  clientSelect.addEventListener('change', () => {
+    const selected = clientSelect.options[clientSelect.selectedIndex];
+    clientName.value = selected?.dataset?.name || '';
+    clientEmail.value = selected?.dataset?.email || '';
+  });
+
+  async function loadServices() {
+    const response = await fetch('/api/services');
+    const payload = await response.json();
+    const services = payload.services || [];
+
+    serviceList.innerHTML = services.map((service) => `
+      <label class="border rounded p-2 d-flex align-items-center justify-content-between gap-2">
+        <span class="d-flex align-items-center gap-2">
+          <input type="checkbox" class="form-check-input service-check" value="${service.id}">
+          <span><strong>${service.code}</strong> - ${service.description}</span>
+        </span>
+        <span class="d-flex align-items-center gap-2">
+          <span class="text-muted">$${Number(service.rate).toFixed(2)}</span>
+          <input class="form-control form-control-sm service-qty" type="number" min="1" value="1" style="width: 80px;">
+        </span>
+      </label>
+    `).join('');
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const chosen = [...document.querySelectorAll('.service-check:checked')];
+    if (chosen.length === 0) {
+      alert('Please choose at least one service item.');
+      return;
+    }
+
+    const items = chosen.map((checkbox) => {
+      const row = checkbox.closest('label');
+      const qty = Number(row.querySelector('.service-qty').value || 1);
+      return { service_id: Number(checkbox.value), quantity: qty };
+    });
+
+    const payload = {
+      client_id: Number(clientSelect.value),
+      client_name: clientName.value.trim(),
+      email: clientEmail.value.trim(),
+      items,
+    };
+
+    const response = await fetch('/api/invoices/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      alert(result.error || 'Failed to create invoice.');
+      return;
+    }
+
+    window.location.href = '/approvals';
+  });
+
+  loadServices();
+</script>
+{% endblock %}

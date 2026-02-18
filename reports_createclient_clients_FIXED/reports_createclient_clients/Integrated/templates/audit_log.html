@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h4 mb-1">Audit Log</h1>
+    <p class="text-muted mb-0">Timeline of invoice-related actions across teams.</p>
+  </div>
+  <a class="btn btn-warning" href="{{ url_for('audit_scan') }}"><i class="bi bi-robot me-1"></i>Run AI Scan</a>
+</div>
+
+<div class="card p-3">
+  {% if invoices|length == 0 %}
+    <div class="text-muted">No audit logs found.</div>
+  {% else %}
+    <div class="accordion" id="auditAccordion">
+      {% for inv_id, data in invoices.items() %}
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="head-{{ loop.index }}">
+          <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#item-{{ loop.index }}" aria-expanded="{{ 'true' if loop.first else 'false' }}">
+            <span class="fw-semibold me-2">{{ inv_id }}</span>
+            <span class="text-muted me-2">{{ data.client }}</span>
+            <span class="badge text-bg-light border">{{ data.status|capitalize }}</span>
+          </button>
+        </h2>
+        <div id="item-{{ loop.index }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#auditAccordion">
+          <div class="accordion-body p-0">
+            <table class="table mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Action</th>
+                  <th>By</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for log in data.logs %}
+                <tr class="{% if log.id in anomalies %}table-danger{% endif %}">
+                  <td>{{ log.timestamp }}</td>
+                  <td>{{ log.action }}</td>
+                  <td>{{ log.created_by or 'System' }}</td>
+                  <td>${{ "%.2f"|format(log.amount or 0) }}</td>
+                  <td><span class="badge text-bg-light border">{{ log.status|capitalize }}</span></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

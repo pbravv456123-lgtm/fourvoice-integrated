@@ -1,0 +1,173 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    /* The light blue/purple background color from Pic 1 */
+    background-color: #eef2ff; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.main-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Page Headers (Outside Card) */
+.page-title {
+    text-align: center;
+    color: #2563eb; /* Blue color */
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 12px;
+}
+
+.page-subtitle {
+    color: #4b5563;
+    font-size: 14px;
+    margin-bottom: 32px;
+}
+
+/* Card Styling */
+.card {
+    background: white;
+    width: 100%;
+    max-width: 400px;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Inputs */
+.input-group {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+    display: block;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    color: #111;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+input::placeholder {
+    color: #9ca3af;
+}
+
+input:focus {
+    border-color: #2563eb;
+}
+
+/* Error States */
+input.error {
+    border-color: #ef4444 !important;
+}
+
+.error-msg {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 4px;
+    display: none;
+}
+
+/* Password Toggle */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+/* Forgot Password */
+.forgot-link-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -10px;
+    margin-bottom: 24px;
+}
+
+.forgot-link {
+    font-size: 12px;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* Button */
+.signin-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #111827; /* Dark button */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.signin-btn:hover {
+    background-color: #000;
+}
+
+/* Info Box (The blue box at bottom) */
+.info-box {
+    margin-top: 24px;
+    background-color: #eff6ff; /* Light blue bg */
+    border-radius: 6px;
+    padding: 16px;
+    font-size: 13px;
+    color: #1e293b;
+    line-height: 1.5;
+    text-align: left;
+}
+
+/* Footer Link */
+.footer-link {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.footer-link a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+}

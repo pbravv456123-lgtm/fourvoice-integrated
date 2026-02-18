@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="card p-3">
+    <div class="fw-semibold">Dashboard</div>
+    <div class="text-muted mb-3">
+      Open either the modern workflow or the legacy workflow from the integrated app.
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-primary btn-sm" href="{{ url_for('clients_list') }}">Go to Clients</a>
+      <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('legacy_clients_page') }}">Open Legacy Clients</a>
+      <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('legacy_create_invoice_page') }}">Open Legacy Create Invoice</a>
+    </div>
+  </div>
+{% endblock %}

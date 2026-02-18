@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="fv-main">
+  <div class="mb-4">
+    <h1 class="fw-bold mb-1">Settings</h1>
+    <p class="text-muted">Configure webhook, API credentials, and business information</p>
+  </div>
+
+  <form method="POST" action="{{ url_for('settings') }}" id="settingsForm">
+    
+    <!-- Webhook Configuration -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title fw-bold mb-3">
+          <i class="bi bi-webhook text-primary"></i>
+          Webhook Configuration
+        </h5>
+        <p class="text-muted small mb-4">
+          Configure TurboSMTP webhook for automatic delivery status updates.
+        </p>
+        
+        <div class="mb-3">
+          <label for="webhook_url" class="form-label fw-semibold">Webhook URL</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="webhook_url" 
+            name="webhook_url" 
+            value="{{ settings.webhook_url }}"
+            placeholder="https://your-domain.com/webhooks/turbosmtp"
+          >
+          <div class="form-text">
+            Enter the public URL where TurboSMTP will send delivery events.
+          </div>
+          <div id="webhookValidationAlert" class="alert mt-3 mb-0 {% if webhook_validation.state == 'active' %}alert-success{% else %}alert-warning{% endif %}"
+            {% if webhook_validation.state == 'empty' %}style="display: none;"{% endif %}
+            data-initial-state="{{ webhook_validation.state }}">
+            <span id="webhookValidationMessage">
+              {% if webhook_validation.state == 'active' %}
+                Webhook connected successfully.
+              {% elif webhook_validation.state != 'empty' %}
+                {{ webhook_validation.message }}
+              {% endif %}
+            </span>
+          </div>
+        </div>
+        
+        <div class="form-check">
+          <input 
+            class="form-check-input" 
+            type="checkbox" 
+            id="webhook_enabled" 
+            name="webhook_enabled"
+            {% if settings.webhook_enabled %}checked{% endif %}
+          >
+          <label class="form-check-label" for="webhook_enabled">
+            Enable webhook processing
+          </label>
+          <div class="form-text">
+            Automatic status updates from TurboSMTP delivery events.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TurboSMTP API Credentials -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title fw-bold mb-3">
+          <i class="bi bi-key text-primary"></i>
+          TurboSMTP API Credentials (Optional)
+        </h5>
+        <p class="text-muted small mb-4">
+          Store API credentials for future webhook authentication.
+        </p>
+        
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="turbosmtp_key" class="form-label fw-semibold">Consumer Key</label>
+            <input 
+              type="text" 
+              class="form-control font-monospace" 
+              id="turbosmtp_key" 
+              name="turbosmtp_key" 
+              value="{{ settings.turbosmtp_key }}"
+              placeholder="206dba74960ac7a826cb"
+            >
+            <div class="form-text">
+              TurboSMTP Consumer Key (API authentication)
+            </div>
+          </div>
+          
+          <div class="col-md-6 mb-3">
+            <label for="turbosmtp_secret" class="form-label fw-semibold">Consumer Secret</label>
+            <input 
+              type="password" 
+              class="form-control font-monospace" 
+              id="turbosmtp_secret" 
+              name="turbosmtp_secret" 
+              value="{{ settings.turbosmtp_secret }}"
+              placeholder="••••••••••••••••"
+            >
+            <div class="form-text">
+              TurboSMTP Consumer Secret (keep confidential)
+            </div>
+          </div>
+        </div>
+        
+        <div class="alert alert-info mb-0">
+          <i class="bi bi-info-circle me-2"></i>
+          These credentials secure your webhook connection and protect delivery-status updates in production.
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-end align-items-center">
+      <div>
+        <button type="reset" class="btn btn-outline-secondary me-2">
+          <i class="bi bi-arrow-clockwise"></i> Reset
+        </button>
+        <button type="submit" class="btn btn-primary" id="saveSettingsBtn">
+          <i class="bi bi-save"></i> Save Settings
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Help Section -->
+  <div class="card mt-4 bg-light border-0">
+    <div class="card-body">
+      <h6 class="fw-bold mb-3">
+        <i class="bi bi-question-circle text-info"></i>
+        Quick Reference
+      </h6>
+      <ul class="mb-0">
+        <li class="mb-2">
+          <strong>Webhook URL:</strong> Public HTTPS endpoint for receiving delivery events
+        </li>
+        <li>
+          <strong>Manual Tracking:</strong> When webhooks disabled, verify delivery in TurboSMTP dashboard
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const settingsForm = document.getElementById('settingsForm');
+    const saveBtn = document.getElementById('saveSettingsBtn');
+    if (!settingsForm || !saveBtn) return;
+
+    const defaultHtml = saveBtn.innerHTML;
+    settingsForm.addEventListener('submit', function () {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Saving...';
+
+      setTimeout(() => {
+        if (saveBtn.disabled) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = defaultHtml;
+        }
+      }, 12000);
+    });
+  });
+</script>
+{% endblock %}

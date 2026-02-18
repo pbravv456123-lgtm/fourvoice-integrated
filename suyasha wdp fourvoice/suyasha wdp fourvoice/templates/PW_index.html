@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - FourVoice</title>
+    <link rel="stylesheet" href="../static/CSS/PW_style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="shell">
+        <div class="card">
+            
+            <div class="form-header-row">
+                <a href="/signin" class="back-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </a>
+                <span class="step-indicator">Reset Password</span>
+            </div>
+
+            <h1 class="title">Reset your password</h1>
+            <p class="subtitle">Enter your email and a new password</p>
+
+            <form id="resetForm" method="POST" action="/forgot-password">
+                
+                <div class="input-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="name@company.com">
+                    <div class="error-msg">Email is required</div>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">New Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="password" placeholder="New password">
+                        <span class="toggle-password" onclick="togglePassword('password', this)">
+                            <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </span>
+                    </div>
+                    <div class="helper-text">Passwords should contain at least 8 characters with both lowercase and uppercase alphabets and include numbers.</div>
+                    <div class="error-msg" id="passwordError">Password is required</div>
+                </div>
+
+                <div class="input-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                        <span class="toggle-password" onclick="togglePassword('confirmPassword', this)">
+                            <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </span>
+                    </div>
+                    <div class="error-msg" id="confirmError">Please confirm your password</div>
+                </div>
+
+                <button type="submit" id="resetBtn" class="continue-btn" disabled>Reset Password</button>
+
+            </form>
+
+            <div class="footer-link">
+                Remember your password? <a href="/signin">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/JS/PW_script.js"></script>
+</body>
+</html>

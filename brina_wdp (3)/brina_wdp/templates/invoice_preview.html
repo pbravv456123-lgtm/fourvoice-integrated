@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="preview-page">
+  <h1 class="preview-title">Invoice Preview</h1>
+  <p class="preview-sub">Review before submitting for approval</p>
+
+  {% if not invoice %}
+    <div class="invoice-card">
+      <div class="muted">No invoice found yet. Create an invoice first, then click Preview.</div>
+    </div>
+  {% else %}
+  <div class="invoice-card">
+    <div class="invoice-header">
+      <div>
+        <h2 class="brand">FourVoice</h2>
+        <p>123 Business Street</p>
+        <p>Singapore 123456</p>
+        <p>contact@fourvoice.com</p>
+        <p>+65 1234 5678</p>
+      </div>
+      <div class="invoice-meta">
+        <h2 class="invoice-label">INVOICE</h2>
+        <p><strong>{{ invoice.invoice_number }}</strong></p>
+        <p>Issue Date: {{ invoice.issue_date }}</p>
+        <p>Due Date: {{ invoice.due_date }}</p>
+      </div>
+    </div>
+
+    <div class="billto">
+      <h4>Bill To:</h4>
+      <p><strong>{{ invoice.client_name }}</strong></p>
+      {% if invoice.client_email %}<p>{{ invoice.client_email }}</p>{% endif %}
+      {% if invoice.client_address %}<p>{{ invoice.client_address }}</p>{% endif %}
+    </div>
+
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Qty</th>
+          <th>Rate</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in invoice['items'] %}
+        <tr>
+          <td>{{ item.description }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>S${{ "%.2f"|format(item.unit_price) }}</td>
+          <td>S${{ "%.2f"|format(item.quantity * item.unit_price) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <div>Subtotal <span>S${{ "%.2f"|format(invoice.subtotal) }}</span></div>
+      <div>GST ({{ invoice.gst_rate }}%) <span>S${{ "%.2f"|format(invoice.gst) }}</span></div>
+      <div class="grand">Total Amount <span>S${{ "%.2f"|format(invoice.total) }}</span></div>
+    </div>
+  </div>
+
+  <div class="preview-actions">
+    <a href="/create-invoice" class="pv-btn pv-secondary">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+      <span>Back to Edit</span>
+    </a>
+
+    <a href="{{ url_for('download_invoice_pdf', invoice_id=invoice.id) }}" class="pv-btn pv-secondary">
+      <i class="fa-solid fa-download" aria-hidden="true"></i>
+      <span>Download PDF</span>
+    </a>
+
+    <a href="{{ url_for('submit_invoice', invoice_id=invoice.id) }}" class="pv-btn pv-primary">
+      <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+      <span>Submit for Approval</span>
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

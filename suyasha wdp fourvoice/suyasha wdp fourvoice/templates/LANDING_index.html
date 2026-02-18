@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FourVoice Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/LANDING_style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <h1 class="logo">FourVoice</h1>
+            
+            <div class="user-pill">
+                <a href="{{ url_for('delete_account') }}" style="text-decoration: none; display: flex; align-items: center; flex: 1; min-width: 0; color: inherit; cursor: pointer;">
+                    <div class="avatar">{{ user_initial }}</div>
+                    <div class="user-meta">
+                        <span class="user-name">{{ session.get('user_name', 'User') }}</span>
+                        <span class="user-email">{{ user_email }}</span>
+                    </div>
+                </a>
+                <a href="{{ url_for('logout') }}" class="logout-icon" title="Logout" style="text-decoration: none;">📤</a>
+            </div>
+
+            <div class="company-dropdown">
+                <span class="comp-icon">🏢</span>
+                <span class="comp-name">{{ company_name }}</span>
+                <span class="chevron">⌄</span>
+            </div>
+
+            <nav class="side-nav">
+                {% for link in nav_links %}
+                    <a href="{{ link.url }}" class="nav-link {% if link.active %}active{% endif %}">
+                        {{ link.icon }} {{ link.text }}
+                        {% if link.notif %}<span class="notif-badge">{{ link.notif }}</span>{% endif %}
+                    </a>
+                {% endfor %}
+                
+                <a href="{{ url_for('user_management') }}" class="nav-link">
+                    👤 User Management
+                </a>
+            </nav>
+        </aside>
+
+        <main class="content-area">
+            <header class="header">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Search invoices, clients, or amounts..." value="{{ search_query }}">
+                </div>
+                <div class="header-btns">
+                    <button class="btn-outline">＋ Add client</button>
+                    <button class="btn-dark">＋ Create invoice</button>
+                    <div class="bell-icon">🔔 <span class="dot">{{ notifications_count }}</span></div>
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                {% for card in stats_cards %}
+                    <div class="card {{ card.color }}">
+                        <div class="card-top">{{ card.title }} <span class="arrow">→</span></div>
+                        <div class="card-val">{{ card.value }}</div>
+                        <div class="card-desc">{{ card.desc }}</div>
+                        <div class="card-footer">👁 Click to view details</div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="main-grid">
+                <section class="chart-section">
+                    <div class="section-header">
+                        <h2>Financial Overview</h2>
+                        <div class="pill-filters">
+                            {% for period in filter_periods %}
+                                <span class="{% if period.active %}active{% endif %}">{{ period.label }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="sub-filters">
+                        <div class="filter-group">
+                            Metric: 
+                            {% for metric in metrics %}
+                                <span class="{% if metric.active %}blue-text{% endif %}">{{ metric.label }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="filter-group">
+                            Chart: 
+                            {% for chart_type in chart_types %}
+                                <span class="{% if chart_type.active %}blue-text{% endif %}">{{ chart_type.label }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </section>
+
+                <aside class="upcoming-sidebar">
+                    <div class="section-header">
+                        <h2>📅 Upcoming Due</h2>
+                        <span class="badge-orange">{{ upcoming_due|length }} invoices</span>
+                    </div>
+                    
+                    {% if upcoming_due %}
+                        {% for invoice in upcoming_due %}
+                            <div class="upcoming-card {% if invoice.overdue %}overdue-bg{% endif %}">
+                                <p class="client">{{ invoice.client }} {% if invoice.overdue %}<span class="mini-icon">📉</span>{% endif %}</p>
+                                <p class="date">📅 Due: {{ invoice.due_date }}</p>
+                                <div class="price-line">
+                                    <strong>{{ invoice.amount }}</strong> 
+                                    <span class="pill-{{ 'red' if invoice.status == 'Overdue' else 'blue' }}">{{ invoice.status }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="empty-state">No upcoming payments due.</p>
+                    {% endif %}
+                    
+                    <button class="btn-orange-full">View all upcoming</button>
+                </aside>
+            </div>
+
+            <section class="table-section">
+                <div class="section-header">
+                    <h2>Recent invoices</h2>
+                    <div class="table-search">
+                        <input type="text" placeholder="Search by client or invoice #" value="{{ table_search_query }}">
+                    </div>
+                </div>
+                <table class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Client</th>
+                            <th>Issue date</th>
+                            <th>Due date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in recent_invoices %}
+                        <tr>
+                            <td>{{ invoice.number }}</td>
+                            <td>{{ invoice.client }}</td>
+                            <td>{{ invoice.issue_date }}</td>
+                            <td>{{ invoice.due_date }}</td>
+                            <td>{{ invoice.amount }}</td>
+                            <td>
+                                <span class="pill-{{ 'green' if invoice.status == 'Paid' else 'blue' if invoice.status == 'Sent' else 'red' }}">
+                                    {{ invoice.status }}
+                                </span>
+                            </td>
+                            <td class="blue-text">🕒 History</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='JS/LANDING_script.js') }}"></script>
+</body>
+</html>

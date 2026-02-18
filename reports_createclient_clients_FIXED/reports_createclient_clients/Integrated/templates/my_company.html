@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h4 mb-1">My Company</h1>
+    <p class="text-muted mb-0">Organization profile used across approvals and delivery workflows.</p>
+  </div>
+</div>
+
+<div class="card p-3">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label text-muted small">Company Name</label>
+      <div class="fw-semibold">{{ company.name }}</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label text-muted small">Primary Contact</label>
+      <div class="fw-semibold">{{ company.contact }}</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label text-muted small">Email</label>
+      <div>{{ company.email }}</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label text-muted small">Timezone</label>
+      <div>{{ company.timezone }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

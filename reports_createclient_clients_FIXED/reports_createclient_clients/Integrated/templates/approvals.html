@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/approvals/approvals.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="fv-main">
+
+  <!-- Main Approvals List View -->
+  <div id="approvalsListView">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <div>
+        <h1 class="fw-bold mb-1">Invoice Approvals</h1>
+        <p class="text-muted">Review and manage invoice approval statuses</p>
+      </div>
+    </div>
+
+  <!-- STATUS CARDS -->
+  <div class="row g-3 mb-4">
+    <div class="col">
+      <div class="card fv-stat-card" data-status="pending" onclick="filterByStatus('pending')">
+        <div class="fw-semibold">Pending Approval</div>
+        <div class="fs-3 fw-bold" id="pending-count">0</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card fv-stat-card" data-status="approved" onclick="filterByStatus('approved')">
+        <div class="fw-semibold">Approved Today</div>
+        <div class="fs-3 fw-bold" id="approved-count">0</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card fv-stat-card" data-status="rejected" onclick="filterByStatus('rejected')">
+        <div class="fw-semibold">Rejected Today</div>
+        <div class="fs-3 fw-bold" id="rejected-count">0</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card fv-stat-card" data-status="on-hold" onclick="filterByStatus('on-hold')">
+        <div class="fw-semibold">On Hold</div>
+        <div class="fs-3 fw-bold" id="on-hold-count">0</div>
+      </div>
+    </div>
+  </div>
+<br>
+  <!-- SEARCH -->
+  <div class="card p-3 mb-3">
+    <div class="fv-search">
+      <i class="bi bi-search"></i>
+      <input
+        class="form-control fv-search-input"
+        id="approvalsSearchInput"
+        placeholder="Search by invoice number, client, or email..."
+      >
+    </div>
+  </div>
+
+  <!-- DATE FILTER -->
+  <div class="card p-3 mb-3">
+    <div class="fw-semibold text-muted mb-3">Filter by Date</div>
+    <div class="row g-2">
+      <div class="col-md-6">
+        <label class="form-label small">From Date</label>
+        <input type="text" class="form-control" id="approvalsDateFrom" placeholder="dd/mm/yyyy" maxlength="10">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label small">To Date</label>
+        <input type="text" class="form-control" id="approvalsDateTo" placeholder="dd/mm/yyyy" maxlength="10">
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTER PILLS -->
+  <div class="card p-3 mb-3">
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="fw-semibold text-muted">Filter by Status</div>
+
+      <div class="d-flex gap-2">
+        <button class="fv-pill active" data-filter="all" onclick="filterByStatus('all')">
+          All
+        </button>
+        <button class="fv-pill" data-filter="pending" onclick="filterByStatus('pending')">
+          Pending
+        </button>
+        <button class="fv-pill" data-filter="approved" onclick="filterByStatus('approved')">
+          Approved
+        </button>
+        <button class="fv-pill" data-filter="rejected" onclick="filterByStatus('rejected')">
+          Rejected
+        </button>
+        <button class="fv-pill" data-filter="on-hold" onclick="filterByStatus('on-hold')">
+          On Hold
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card">
+    <table class="table mb-0 fv-table">
+      <thead>
+        <tr>
+          <th>Invoice #</th>
+          <th>Submitted By</th>
+          <th>Client</th>
+          <th>Submitted Date</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="approvals-table-body">
+        <tr>
+          <td colspan="7" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div id="empty-state" class="text-center py-5" style="display: none;">
+    <i class="bi bi-inbox" style="font-size: 3rem; color: #94a3b8;"></i>
+    <h3 class="mt-3" style="color: #475569;">No invoices found</h3>
+    <p class="text-muted">There are no invoices matching your current filter.</p>
+  </div>
+
+  </div>
+  <!-- End of Approvals List View -->
+
+  <!-- Edit Invoice View (hidden by default) -->
+  <div id="editInvoiceView" style="display: none;">
+    <!-- Content will be loaded dynamically -->
+  </div>
+
+</div>
+
+<!-- Action Modal -->
+<div class="fv-modal-overlay" id="actionModal" style="display: none;">
+  <div class="fv-modal" style="max-width: 500px;">
+    <div class="fv-modal-header">
+      <div>
+        <h5 class="mb-0 fw-bold" id="actionModalTitle">Confirm Action</h5>
+      </div>
+      <button class="fv-modal-close" onclick="closeActionModal(true)">×</button>
+    </div>
+
+    <div class="fv-modal-body">
+      <p id="actionModalMessage" class="mb-3"></p>
+      <div id="reasonField" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label for="rejectionReason" class="form-label mb-0">Reason (optional)</label>
+          <button type="button" class="btn btn-sm" onclick="detectWithAI()" id="aiDetectBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; font-size: 0.875rem;">
+            <i class="bi bi-stars"></i> AI Auto Fill
+          </button>
+        </div>
+        <div class="mb-2" id="rejectTypeField" style="display: none;">
+          <label for="rejectionType" class="form-label mb-1">Rejected Action Type</label>
+          <select class="form-select" id="rejectionType">
+            <option value="editable">Re-edit (fix invoice details)</option>
+            <option value="non-editable">Acknowledge (business/external issue)</option>
+          </select>
+        </div>
+        <textarea class="form-control" id="rejectionReason" rows="3" placeholder="Enter reason for rejection or use AI to detect issues..."></textarea>
+      </div>
+    </div>
+
+    <div class="fv-modal-footer">
+      <button class="btn btn-outline-secondary" onclick="closeActionModal(true)">Cancel</button>
+      <button class="btn btn-primary" id="confirmActionBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Invoice Detail Modal -->
+<div class="fv-modal-overlay" id="approvalModal">
+  <div class="fv-modal">
+    <div class="fv-modal-header">
+      <div>
+        <h5 class="mb-0 fw-bold">Invoice Details</h5>
+        <small class="text-muted" id="modalInvoiceNumber">INV-</small>
+      </div>
+      <button class="fv-modal-close" onclick="closeApprovalModal()">×</button>
+    </div>
+
+    <div class="fv-modal-body">
+      <!-- Rejection Details (only shown for rejected invoices) -->
+      <div id="rejectionDetailsContainer" style="display: none;" class="mb-4">
+        <div class="fv-label mb-2">Rejection Details</div>
+        <div class="rejection-box">
+          <div class="d-flex align-items-start">
+            <i class="bi bi-exclamation-circle text-danger me-2 mt-1"></i>
+            <div class="flex-grow-1">
+              <div class="fw-bold mb-1" id="modalRejectionTitle">Pricing Discrepancy</div>
+              <div id="modalRejectionReason" class="text-muted">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two Column Layout: Client Info (Left) + Invoice Details (Right) -->
+      <div class="row mb-4">
+        <!-- Left Column: Client Information -->
+        <div class="col-md-6 d-flex flex-column">
+          <h6 class="fw-bold mb-3">Client Information</h6>
+          <div class="card flex-grow-1">
+            <div class="card-body">
+              <div class="mb-3">
+                <div class="fv-label">Client Name</div>
+                <div id="modalClientName" class="fw-medium">-</div>
+              </div>
+              <div class="mb-3">
+                <div class="fv-label">Email</div>
+                <div id="modalClientEmail" class="text-muted">-</div>
+              </div>
+              <div class="mb-3">
+                <div class="fv-label">Phone</div>
+                <div id="modalClientPhone" class="text-muted">-</div>
+              </div>
+              <div class="mb-0">
+                <div class="fv-label">Business Location</div>
+                <div id="modalBusinessLocation" class="text-muted">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Invoice Details -->
+        <div class="col-md-6 d-flex flex-column">
+          <h6 class="fw-bold mb-3">Invoice Details</h6>
+          <div class="card flex-grow-1">
+            <div class="card-body">
+              <div class="mb-3">
+                <div class="fv-label">Submitted Date</div>
+                <div id="modalSubmittedDate" class="fw-medium">-</div>
+              </div>
+              <div class="mb-3">
+                <div class="fv-label">Due Date</div>
+                <div id="modalDueDate" class="fw-medium">-</div>
+              </div>
+              <div class="mb-3">
+                <div class="fv-label">Payment Terms</div>
+                <div id="modalPaymentTerms" class="fw-medium">Net 30</div>
+              </div>
+              <div class="mb-3">
+                <div class="fv-label">Total Amount</div>
+                <div id="modalAmount" class="fv-amount">$0.00</div>
+              </div>
+              <div class="mb-0">
+                <div class="fv-label">Approval Status</div>
+                <span class="fv-status" id="modalStatus">Pending</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Approval Workflow will be inserted here by JavaScript -->
+
+      <!-- INVOICE ITEMS TABLE -->
+      <h6 class="fw-bold mb-3">Invoice Items</h6>
+      <table class="table fv-modal-table mb-4">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th class="text-center">Qty</th>
+            <th class="text-end">Rate</th>
+            <th class="text-end">Amount</th>
+          </tr>
+        </thead>
+        <tbody id="modalItems">
+          <!-- Items will be inserted here by JavaScript -->
+        </tbody>
+        <tfoot id="modalTotals">
+          <!-- Totals will be inserted here by JavaScript -->
+        </tfoot>
+      </table>
+
+      <!-- Service Notes -->
+      <div class="mb-4">
+        <div class="fv-label mb-2">Notes</div>
+        <div class="notes-box">
+          <i class="bi bi-file-text text-muted me-2"></i>
+          <span id="modalNotes">No service details available</span>
+        </div>
+      </div>
+
+      <div class="mb-4" id="pendingAIValidationPanel" style="display: none;">
+        <div class="fv-label mb-2">AI Validation Findings</div>
+        <div id="pendingAIValidationContent"></div>
+      </div>
+    </div>
+
+    <div class="fv-modal-footer">
+      <div></div>
+      <div class="d-flex gap-2" id="modalActionButtons">
+        <button class="btn btn-outline-secondary" onclick="closeApprovalModal()">
+          Close
+        </button>
+        <!-- Action buttons will be inserted here by JavaScript -->
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  window.currentUserRole = "{{ current_user_role }}";
+</script>
+<script src="{{ url_for('static', filename='css/approvals/approvals.js') }}"></script>
+{% endblock %}
