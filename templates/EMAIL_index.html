@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FourVoice - Verify Email</title>
+    <link rel="stylesheet" href="../static/CSS/EMAIL_style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="email-wrapper"> 
+        <div class="header-nav">
+            <a href="/signup" class="back-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">←</a>
+            <span class="step-counter">{{ step_text }}</span>
+        </div>
+
+        <h1 class="outer-title">{{ outer_title }}</h1>
+
+        <div class="email-card">
+            <div id="resendSuccess" class="success-alert {% if not resend_success %}hidden{% endif %}">
+                <span class="check-icon">✓</span>
+                <span>{{ resend_message }}</span>
+            </div>
+
+            <h2 class="main-title">{{ main_title }}</h2>
+            
+            <p class="instruction">{{ instruction_text }}</p>
+            <p class="target-email">{{ user_email }}</p>
+            
+            <p class="acra-notice">
+                This is the email address registered with ACRA for <strong>{{ company_name }}</strong>
+            </p>
+
+            <div class="info-section">
+                <h3 class="info-title">{{ info_title }}</h3>
+                <p class="info-text">{{ info_text }}</p>
+            </div>
+
+            <div class="input-group">
+                <label for="verifyCode">Verification code *</label>
+                <input type="text" id="verifyCode" name="code" placeholder="Enter 6-digit code" maxlength="6" inputmode="numeric" required>
+                <p class="expiry-text">{{ expiry_text }}</p>
+            </div>
+
+            <div class="resend-container">
+                <div id="resendPrompt">
+                    <span class="no-code-text">{{ resend_prompt_text }}</span>
+                    <button type="button" id="resendBtn" class="link-btn">{{ resend_btn_text }}</button>
+                </div>
+                <span id="countdown" class="countdown-text {% if countdown_hidden %}hidden{% endif %}">
+                    {{ countdown_text }} <span id="timer">{{ countdown_timer }}</span>s
+                </span>
+            </div>
+
+            <button type="button" class="action-btn" id="verifyBtn" disabled>
+                {{ verify_btn_text }}
+            </button>
+
+            <div class="help-section">
+                <p><strong>{{ help_title }}</strong> {{ help_text }}</p>
+            </div>
+        </div>
+    </div>
+    <script src="../static/JS/EMAIL_script.js"></script>
+</body>
+</html>
