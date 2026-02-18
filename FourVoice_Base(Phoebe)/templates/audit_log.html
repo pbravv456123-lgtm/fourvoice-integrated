@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    /* This class is applied by JS only when you click the button */
+    .highlight-anomaly {
+        border: 2px solid #dc3545 !important;
+        background-color: #fff5f5 !important;
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.3);
+        transform: scale(1.02);
+        transition: all 0.3s ease;
+    }
+    /* Existing Styles */
+    .fv-timeline { position: relative; }
+    .fv-timeline::before {
+        content: ''; position: absolute; left: 15px; top: 10px; bottom: 20px;
+        width: 2px; background: #e9ecef; z-index: 0;
+    }
+    .timeline-item { position: relative; }
+    .text-purple { color: #6f42c1 !important; }
+    .accordion-button:not(.collapsed) { background-color: transparent; box-shadow: none; }
+    .accordion-button::after { background-size: 1rem; }
+</style>
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="fw-bold mb-0">Audit Log</h2>
+        <p class="text-muted small mb-0">Complete activity history organized by invoice</p>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <button onclick="runSmartScan()" class="btn btn-warning shadow-sm fw-bold px-4 rounded-pill">
+            <i class="bi bi-robot me-2"></i>AI Smart Scan
+        </button>
+        <div class="text-muted small">
+            <i class="bi bi-clock-history me-1"></i> Last updated: Just now
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4 border-0 shadow-sm rounded-3">
+    <div class="card-body p-4">
+        <div class="input-group border rounded-3 overflow-hidden">
+            <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" class="form-control border-0 shadow-none" placeholder="Search by invoice number, client, or user...">
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-white border-bottom p-4">
+        <h5 class="fw-bold mb-1">Invoice Activity</h5>
+        <p class="text-muted small mb-0">{{ invoices|length }} invoices found</p>
+    </div>
+    
+    <div class="accordion accordion-flush" id="auditAccordion">
+        {% for inv_id, data in invoices.items() %}
+        <div class="accordion-item border-bottom">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed px-4 py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ loop.index }}">
+                    <div class="d-flex align-items-center w-100">
+                        <div class="bg-primary-subtle text-primary rounded-circle p-2 me-3">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div class="me-auto">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold">{{ inv_id }}</span>
+                                <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill small">{{ data.status }}</span>
+                            </div>
+                            <div class="text-muted small">{{ data.client }} &bull; S${{ "%.2f"|format(data.amount) }} &bull; {{ data.logs|length }} actions</div>
+                        </div>
+                    </div>
+                </button>
+            </h2>
+
+            <div id="collapse-{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#auditAccordion">
+                <div class="accordion-body bg-light bg-opacity-25 px-5 py-4">
+                    <div class="fv-timeline">
+                        {% for log in data.logs %}
+                        
+                        {# IMPROVED LOGIC FOR ICONS AND COLORS #}
+                        {% set icon = "bi-circle" %}{% set color = "text-secondary" %}{% set user = "System" %}{% set desc = "Activity recorded" %}
+                        
+                        {% if "Created" in log.action or "New" in log.action %}
+                            {% set icon = "bi-plus-lg" %}{% set color = "text-primary" %}{% set user = "Sarah Chen" %}{% set desc = "Draft invoice created" %}
+                        {% elif "Edit" in log.action or "Update" in log.action %}
+                            {% set icon = "bi-pencil-square" %}{% set color = "text-secondary" %}{% set user = "Sarah Chen" %}{% set desc = "Updated line item pricing" %}
+                        {% elif "Submit" in log.action %}
+                            {% set icon = "bi-arrow-right" %}{% set color = "text-warning" %}{% set user = "Sarah Chen" %}{% set desc = "Submitted to manager for review" %}
+                        {% elif "Approve" in log.action %}
+                            {% set icon = "bi-check2-circle" %}{% set color = "text-success" %}{% set user = "Daniel Wong" %}{% set desc = "Invoice approved and ready to send" %}
+                        {% elif "Sent" in log.action %}
+                            {% set icon = "bi-send" %}{% set color = "text-info" %}{% set user = "System" %}{% set desc = "Email sent to client" %}
+                        {% elif "View" in log.action %}
+                            {% set icon = "bi-eye" %}{% set color = "text-purple" %}{% set user = "Client Portal" %}{% set desc = "Opened from email link" %}
+                        {% endif %}
+
+                        <div class="timeline-item d-flex gap-3 mb-4">
+                            <div class="timeline-icon bg-white border rounded-circle d-flex align-items-center justify-content-center {{ color }}" style="width: 32px; height: 32px; flex-shrink: 0; z-index: 1;">
+                                <i class="bi {{ icon }}"></i>
+                            </div>
+                            
+                            <div class="card border shadow-sm rounded-3 w-100 p-3 bg-white 
+                                {% if log.amount > 20000 %}anomaly-row{% endif %}">
+                                
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="fw-bold small">{{ log.action }}</span>
+                                    <span class="text-muted tiny" style="font-size: 0.75rem;">{{ log.timestamp }}</span>
+                                </div>
+                                <div class="small text-primary mb-1"><i class="bi bi-person me-1"></i> {{ user }}</div>
+                                
+                                <div class="anomaly-alert d-none text-danger fw-bold small mb-1">
+                                    <i class="bi bi-exclamation-triangle-fill"></i> AI ANOMALY DETECTED: S${{ "%.2f"|format(log.amount) }}
+                                </div>
+                                
+                                <div class="text-muted small">{{ desc }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function runSmartScan() {
+    // A. Change button to "Analyzing..."
+    const btn = event.currentTarget;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyzing...';
+    btn.disabled = true;
+    
+    // B. Wait 800ms to simulate AI working
+    setTimeout(() => {
+        // C. Find all rows marked as anomalies
+        const anomalies = document.querySelectorAll('.anomaly-row');
+        const alerts = document.querySelectorAll('.anomaly-alert');
+        
+        // D. Apply the red highlight style and show the alert text
+        anomalies.forEach(row => {
+            row.classList.add('highlight-anomaly');
+            
+            // Open the accordion if the anomaly is hidden inside
+            const collapse = row.closest('.accordion-collapse');
+            if (collapse) {
+                new bootstrap.Collapse(collapse, { show: true });
+            }
+            
+            // Scroll to the first anomaly
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        // Show the text message
+        anomalies.forEach(row => {
+            const alertMsg = row.querySelector('.anomaly-alert');
+            if(alertMsg) alertMsg.classList.remove('d-none');
+        });
+
+        // E. Reset button to "Done"
+        btn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Analysis Complete';
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-success');
+        
+    }, 1000);
+}
+</script>
+{% endblock %}
