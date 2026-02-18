@@ -1,0 +1,393 @@
+* {
+
+    box-sizing: border-box;
+
+    margin: 0;
+
+    padding: 0;
+
+}
+
+
+
+body {
+
+    font-family: 'Inter', sans-serif;
+
+    background-color: #f9fafb; /* Light grey bg */
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    min-height: 100vh; /* Ensures full height centering */
+
+    padding: 20px; /* Adds some space on smaller screens */
+
+}
+
+
+
+.shell {
+
+    width: 100%;
+
+    display: flex;
+
+    justify-content: center;
+
+}
+
+
+
+.card {
+
+    background: white;
+
+    width: 100%;
+
+    max-width: 450px; /* Slightly reduced width for a more compact look */
+
+    padding: 32px; /* Reduced padding from 40px */
+
+    border-radius: 12px;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+}
+
+
+
+/* Header Section */
+
+.form-header-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 16px; /* Reduced from 20px */
+
+}
+
+
+
+.back-icon {
+
+    color: #374151;
+
+    text-decoration: none;
+
+    display: flex;
+
+    align-items: center;
+
+}
+
+
+
+.step-indicator {
+
+    font-size: 12px;
+
+    color: #6b7280;
+
+    font-weight: 500;
+
+}
+
+
+
+.title {
+
+    font-size: 26px;
+
+    color: #3b82f6; /* ---- CHANGED TO BLUE HERE ---- */
+
+    font-weight: 600;
+
+    margin-bottom: 4px;
+
+}
+
+
+
+.subtitle {
+
+    color: #4b5563;
+
+    font-size: 14px;
+
+    margin-bottom: 24px; /* Reduced from 30px */
+
+}
+
+
+
+/* Inputs */
+
+.input-group {
+
+    margin-bottom: 14px; /* Reduced from 18px */
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+
+
+label {
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    color: #374151;
+
+    margin-bottom: 6px;
+
+    display: block;
+
+}
+
+
+
+input[type="text"],
+
+input[type="email"],
+
+input[type="password"] {
+
+    width: 100%;
+
+    padding: 10px 12px; /* Reduced padding for shorter inputs */
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    color: #111;
+
+    font-family: inherit;
+
+    transition: border-color 0.2s;
+
+}
+
+
+
+input::placeholder {
+
+    color: #9ca3af;
+
+}
+
+
+
+input:focus {
+
+    border-color: #2563eb;
+
+}
+
+
+
+/* Error States */
+
+input.error {
+
+    border-color: #ef4444 !important;
+
+}
+
+
+
+.error-msg {
+
+    color: #ef4444;
+
+    font-size: 12px;
+
+    margin-top: 4px; /* Reduced from 5px */
+
+    display: none;
+
+}
+
+
+
+/* Helper Text */
+
+.helper-text {
+
+    font-size: 11px;
+
+    color: #6b7280;
+
+    margin-top: 4px; /* Reduced from 6px */
+
+    margin-bottom: 0;
+
+}
+
+
+
+/* Password Toggle */
+
+.password-wrapper {
+
+    position: relative;
+
+    width: 100%;
+
+}
+
+
+
+.toggle-password {
+
+    position: absolute;
+
+    right: 10px; /* Adjusted for new input padding */
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+}
+
+
+
+/* Checkbox */
+
+.checkbox-group {
+
+    display: flex;
+
+    align-items: center;
+
+    margin-top: 16px; /* Changed from 10px to balance spacing */
+
+    margin-bottom: 20px; /* Reduced from 24px */
+
+}
+
+
+
+.checkbox-group input {
+
+    margin-right: 8px;
+
+    width: 16px;
+
+    height: 16px;
+
+    cursor: pointer;
+
+    accent-color: #1f2937; /* Matches button color */
+
+}
+
+
+
+.checkbox-group label {
+
+    margin-bottom: 0;
+
+    font-size: 12px;
+
+    color: #374151;
+
+    line-height: 1.4;
+
+}
+
+
+
+.checkbox-group a {
+
+    color: #2563eb;
+
+    text-decoration: none;
+
+}
+
+
+
+/* Button */
+
+.continue-btn {
+
+    width: 100%;
+
+    padding: 12px;
+
+    background-color: #1f2937;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition: background-color 0.2s;
+
+}
+
+
+
+.continue-btn:hover {
+
+    background-color: #111827;
+
+}
+
+
+
+/* Footer */
+
+.footer-link {
+
+    margin-top: 16px; /* Reduced from 24px */
+
+    text-align: center;
+
+    font-size: 13px;
+
+    color: #4b5563;
+
+}
+
+
+
+.footer-link a {
+
+    color: #2563eb;
+
+    text-decoration: none;
+
+    font-weight: 500;
+
+}
